@@ -20,16 +20,14 @@ Node::Node(int address) {
    // Initialize the retransmit counter.
    resetRetransmitAttempts();
    
-   // Initialize the node's Message object to NULL.
-   theMessage = NULL;
-   
    // Initialize the node's Metric object.
    theNodeMetric = new Metric();
 }
 
 // Destructor declared in order to free up the stored message object if needed.
 Node::~Node() {
-   clearMessage();
+   // Delete all stored messaeg objects.
+   clearAllMessages();
    
    // Delete the Metric object.
    Metric* storedMetric = getNodeMetric();
@@ -54,6 +52,7 @@ bool Node::isMediumIdle(std::vector<Node*> nodeVector) {
 
 // Starts the transmit of a message to a node (other than itself).
 bool Node::startMessageTransmit(unsigned int currentTime) {
+   std::cout << "TEMP | entered " << __func__ << " for " << getInternalAddress() << std::endl;
    // Ensure the node has a message.
    if (!hasMessage()) {
       std::cout << "ERROR - cannot start message transmit on node " 
@@ -64,7 +63,7 @@ bool Node::startMessageTransmit(unsigned int currentTime) {
    }
    
    // Update time of completed transmit.
-   int completionTime = currentTime + theMessage->getMessageSize();
+   int completionTime = currentTime + theMessageDeque[0]->getMessageSize();
    if (!setTimeOfTransmitCompletion(completionTime)) {
       std::cout << "ERROR - failed to update node's time of transmit completion" << std::endl;
       return false;
@@ -83,19 +82,18 @@ bool Node::startMessageTransmit(unsigned int currentTime) {
    
    // Reset the retransmit counter.
    resetRetransmitAttempts();
-   
-   
+
    CLog::write(CLog::VERBOSE, 
                "node %d starting transmit with completion time set to: %d\n", 
                getInternalAddress(),
                getTimeOfTransmitCompletion());
    
-   // Update the message object and return.
    return true;
 }
 
 // Completes the node's current transmit of a message.
 bool Node::completeMessageTransmit() {
+   std::cout << "TEMP | entered " << __func__ << " for " << getInternalAddress() << std::endl;
    // Verify that this node is actually in a transmitting state.
    if (getNodeState() != TRANSMITTING) {
       std::cout << "WARNING - node " 
@@ -105,8 +103,8 @@ bool Node::completeMessageTransmit() {
       return false;
    }
    
-   // Remove the node's message that it was sending. This is more symbolic than anything.
-   clearMessage();
+   // Remove the node's message that it was sending.
+   clearCurrentMessage();
    
    // Reset the node's state and return.
    if (!setNodeState(IDLE) || !setTimeOfTransmitCompletion(-1)) {
@@ -156,25 +154,6 @@ bool Node::backoffFromTransmit(unsigned int timeOfNextTransmitAttempt) {
    return true;
 }
 
-// Clears theMessage.
-void Node::clearMessage() {
-   Message* storedMessage = getMessage();
-   if (storedMessage != NULL) {
-      theMessage = NULL;
-      delete storedMessage;
-   }
-}
-
-// Returns if node has a message.
-bool Node::hasMessage() {
-   Message* storedMessage = getMessage();
-   if (storedMessage != NULL) {
-      return true;  
-   }
-   
-   return false;
-}
-
 // Reset the node's counter of consecutively experience.
 void Node::resetRetransmitAttempts() {
    theRetransmitAttempts = 0;
@@ -213,6 +192,51 @@ int Node::determineBackoffEndTime(unsigned int currentTime, Configuration* confi
 int Node::determineEndOfBinaryExpBackoff(unsigned int currentTime, Configuration* configObj) {
    unsigned int power = std::min(configObj->getMaxBackoffRetransmitCount(), getRetransmitAttempts());
    return currentTime + generateRandomIntegerMinToMax(1, pow(2, power));
+}
+
+// Returns if node has a message.
+bool Node::hasMessage() {
+   return !theMessageDeque.empty();
+}
+
+// Adds a message to theMessageVector.
+bool Node::addMessage(Message* messageObj) {
+   std::cout << "TEMP | entered " << __func__ << " for " << getInternalAddress() << std::endl;
+   // Validate the object.
+   if (!messageObj) {
+      std::cout << "ERROR - message object is null" << std::endl;
+      return false;   
+   }
+   
+   // Check if the message buffer overflowed.
+   if (10 == getMessageCount()) {
+      messagesOverflowed();
+   }
+   
+   // Add the message object to the buffer.
+   theMessageDeque.push_back(messageObj);
+   
+   // Update the metric.
+   theNodeMetric->incrementCountOfMessagesGenerated();
+   
+   return true;
+}
+
+// Clears front most message object.
+void Node::clearCurrentMessage() {
+   delete(theMessageDeque.front());
+   theMessageDeque.pop_front();
+}
+
+// Pops a message off the back of theMessageDeque due to a simulated buffer overflow.
+void Node::messagesOverflowed() {
+   CLog::write(CLog::VERBOSE, "node %d dropped a message\n", getInternalAddress());
+   
+   delete(theMessageDeque.back());
+   theMessageDeque.pop_back();
+   
+   // Update the metric.
+   theNodeMetric->incrementCountOfMessagesDropped();
 }
 
 // Setter for nodeInternalAddress.
@@ -274,19 +298,9 @@ bool Node::setRetransmitAttempts(int attempts) {
    return true;
 }
 
-// Setter for theMessage.
-bool Node::setMessage(Message* messageObj) {
-   // Validate the object.
-   if (!messageObj) {
-      std::cout << "ERROR - message object is null" << std::endl;
-      return false;   
-   }
-   
-   // Update the metric.
-   theNodeMetric->incrementCountOfMessagesGenerated();
-   
-   theMessage = messageObj;
-   return true;
+// Returns the count of messages in theMessageDeque.
+int Node::getMessageCount() {
+   return theMessageDeque.size();
 }
 
 // Getter for nodeInternalAddress.
@@ -314,12 +328,12 @@ int Node::getRetransmitAttempts() {
    return theRetransmitAttempts;
 }
 
-// Getter for theMessage.
-Message* Node::getMessage() {
-   return theMessage;  
-}
-
 // Getter for theMetric.
 Metric* Node::getNodeMetric() {
    return theNodeMetric;  
+}
+
+// Clears all message objects in theMessageDeque. 
+void Node::clearAllMessages() {
+   theMessageDeque.clear();
 }

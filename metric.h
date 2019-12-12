@@ -17,6 +17,27 @@ class Metric {
       /*
        * INCREMENTERS/SETTERS
        */
+      // Setter for theCountOfClockCyclesIdle.
+      void setClockCyclesIdle(unsigned int value);
+      
+      // Setter for theCountOfClockCyclesBackedOff.
+      void setClockCyclesBackedOff(unsigned int value);
+      
+      // Setter for theCountOfCollisions.
+      void setCountOfCollisions(unsigned int value);
+      
+      // Setter for theCountOfTransmissionAttempts.
+      void setCountOfTransmissionAttempts(unsigned int value);
+      
+      // Setter for theCountOfMessagesGenerated.
+      void setCountOfMessagesGenerated(unsigned int value);
+      
+      // Setter for theCountOfMessagesTransmitted.
+      void setCountOfMessagesTransmitted(unsigned int value);
+      
+      // Setter for theCountOfMessagesDropped.
+      void setCountOfMessagesDropped(unsigned int value);
+      
       // Incrementer for theCountOfClockCyclesIdle.
       void incrementClockCyclesIdle();
       
@@ -34,6 +55,9 @@ class Metric {
       
       // Incrementer for theCountOfMessagesTransmitted.
       void incrementCountOfMessagesTransmitted();
+      
+      // Incrementer for theCountOfMessagesDropped.
+      void incrementCountOfMessagesDropped();
       
       // Setter for theMaximumRetransmissionAttempts.
       void setMaximumRetransmissionAttempts(unsigned int count);
@@ -59,6 +83,9 @@ class Metric {
       // Getter for theCountOfMessagesTransmitted.
       unsigned int getCountOfMessagesTransmitted();
       
+      // Getter for theCountOfMessagesDropped.
+      unsigned int getCountOfMessagesDropped();
+      
       // Getter for theMaximumRetransmissionAttempts.
       unsigned int getMaximumRetransmissionAttempts();
       
@@ -75,11 +102,14 @@ class Metric {
       // Used to track how many transmission attempts occurred. 
       unsigned int theCountOfTransmissionAttempts;
       
-      // Used to track how many packets were generated.
+      // Used to track how many messages were generated.
       unsigned int theCountOfMessagesGenerated;
       
-      // Used to track how many packets were transmitted.
+      // Used to track how many messages were transmitted.
       unsigned int theCountOfMessagesTransmitted;
+      
+      // Used to track how many messages have overflowed the buffer and have been dropped as a result.
+      unsigned int theCountOfMessagesDropped;
       
       // Used to track the maximum amount of retransmissions occurred before sending any one particular packet.
       unsigned int theMaximumRetransmissionAttempts;

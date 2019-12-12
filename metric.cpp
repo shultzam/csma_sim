@@ -14,6 +14,42 @@ Metric::Metric() {
    theCountOfMessagesGenerated = 0;
    theCountOfMessagesTransmitted = 0;
    theMaximumRetransmissionAttempts = 0;
+   theCountOfMessagesDropped = 0;
+}
+
+// Setter for theCountOfClockCyclesIdle.
+void Metric::setClockCyclesIdle(unsigned int value) {
+   theCountOfClockCyclesIdle = value;
+}
+
+// Setter for theCountOfClockCyclesBackedOff.
+void Metric::setClockCyclesBackedOff(unsigned int value) {
+   theCountOfClockCyclesBackedOff = value;
+}
+
+// Setter for theCountOfCollisions.
+void Metric::setCountOfCollisions(unsigned int value) {
+   theCountOfCollisions = value;
+}
+
+// Setter for theCountOfTransmissionAttempts.
+void Metric::setCountOfTransmissionAttempts(unsigned int value) {
+   theCountOfTransmissionAttempts = value;
+}
+
+// Setter for theCountOfMessagesGenerated.
+void Metric::setCountOfMessagesGenerated(unsigned int value) {
+   theCountOfMessagesGenerated = value;
+}
+
+// Setter for theCountOfMessagesTransmitted.
+void Metric::setCountOfMessagesTransmitted(unsigned int value) {
+   theCountOfMessagesTransmitted = value;
+}
+
+// Setter for theCountOfMessagesDropped.
+void Metric::setCountOfMessagesDropped(unsigned int value) {
+   theCountOfMessagesDropped = value;
 }
 
 // Incrementer for theCountOfClockCyclesIdle.
@@ -44,6 +80,11 @@ void Metric::incrementCountOfMessagesGenerated() {
 // Incrementer for theCountOfMessagesTransmitted.
 void Metric::incrementCountOfMessagesTransmitted() {
    theCountOfMessagesTransmitted++;
+}
+
+// Incrementer for theCountOfMessagesDropped.
+void Metric::incrementCountOfMessagesDropped() {
+   theCountOfMessagesDropped++;
 }
 
 // Setter for theMaximumRetransmissionAttempts.
@@ -79,6 +120,11 @@ unsigned int Metric::getCountOfMessagesGenerated() {
 // Getter for theCountOfMessagesTransmitted.
 unsigned int Metric::getCountOfMessagesTransmitted() {
    return theCountOfMessagesTransmitted;
+}
+
+// Getter for theCountOfMessagesDropped.
+unsigned int Metric::getCountOfMessagesDropped() {
+   return theCountOfMessagesDropped;
 }
 
 // Getter for theMaximumRetransmissionAttempts.

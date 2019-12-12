@@ -5,6 +5,8 @@
 #ifndef __NODE_H__
 #define __NODE_H__
 
+#include <deque>
+
 #include "helpers.h"
 
 // Forward declarations. Resolves circular dependency issues.
@@ -41,12 +43,6 @@ class Node {
       // Backs off from attempting to transmit based on the current configuration.
       bool backoffFromTransmit(unsigned int timeOfNextTransmitAttempt);
    
-      // Clears theMessage.
-      void clearMessage();
-   
-      // Returns if node has a message.
-      bool hasMessage();
-   
       // Reset the node's counter of consecutively experience.
       void resetRetransmitAttempts();
    
@@ -58,6 +54,18 @@ class Node {
       
       // Determine the end of the binary exponential backoff.
       int determineEndOfBinaryExpBackoff(unsigned int currentTime, Configuration* configObj);
+
+      // Returns if node has a message.
+      bool hasMessage();
+
+      // Adds a message to theMessageVector.
+      bool addMessage(Message* messageObj);
+
+      // Clears front most message object.
+      void clearCurrentMessage();
+
+      // Pops a message off the back of theMessageVector due to a simulated buffer overflow.
+      void messagesOverflowed();
    
       /*
        * SETTERS
@@ -83,6 +91,9 @@ class Node {
       /*
        * GETTERS
        */
+      // Returns the count of messages in theMessageVector.
+      int getMessageCount();
+      
       // Getter for theNodeInternalAddress.
       int getInternalAddress();
    
@@ -97,9 +108,6 @@ class Node {
    
       // Getter for theRetransmitAttempts.
       int getRetransmitAttempts();
-   
-      // Getter for theMessage.
-      Message* getMessage();
       
       // Getter for theMetric.
       Metric* getNodeMetric();
@@ -109,6 +117,9 @@ class Node {
       Metric* theNodeMetric;
    
    private:
+      // Clears all message objects in theMessageVector. 
+      void clearAllMessages();
+   
       // Internal address for this node.
       int theNodeInternalAddress;
    
@@ -131,10 +142,10 @@ class Node {
       
       // Integer representing the number of retransmission attempts this node has currently consecutively experienced.
       int theRetransmitAttempts;
-   
-      // Message object. 
-      // Contains non-null Message object if currently transmitting or in a back-off state. Null otherwise.
-      Message* theMessage;
+      
+      // Message deque.
+      // Contains non-null Message objects if currently transmitting or in a back-off state. Maximum count of 10.
+      std::deque<Message*> theMessageDeque;
 };
 
 #endif	// __NODE_H__

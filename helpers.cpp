@@ -10,8 +10,10 @@
 // A decision was made to not verify that the objects are not null to speed up the application. This is risky and not 
 // suitable for any sort of commercial product.
 void determineNodeStates(std::vector<Node*> nodeVector, unsigned int currentTime, Configuration* configObj) {
-   // Shuffle the order of the node vector so that the nodes are being serviced in a "random" order. 
-   // This will help prevent service biases.
+   /* 
+    * Shuffle the order of the node vector so that the nodes are being serviced in a "random" order. 
+    * This will help prevent service biases.
+    */
    std::random_shuffle(nodeVector.begin(), nodeVector.end());
    
    // Loop through each node to check if any transmits concluded.
@@ -19,7 +21,27 @@ void determineNodeStates(std::vector<Node*> nodeVector, unsigned int currentTime
       // Check if current node is transmitting and has completed its transmission.
       if (TRANSMITTING == (*it)->getNodeState() && currentTime == (*it)->getTimeOfTransmitCompletion()) {
          if (!(*it)->completeMessageTransmit()) {
-            std::cout << "WARNING - failed to complete message transmit for node " << (*it)->getInternalAddress() << std::endl;
+            std::cout << "WARNING - failed to complete message transmit for node " 
+                      << (*it)->getInternalAddress() 
+                      << std::endl;
+         }
+      }
+   }
+   
+   // Loop through each node to check if any nodes will generate a message.
+   for (std::vector<Node*>::iterator it = nodeVector.begin(); it != nodeVector.end(); it++) {
+      // Determine if node should try to transmit - based on the porbability of frame generation.
+      if (generateRandomFloatZeroToOne() > (1 - configObj->getProbFrameGeneration())) {
+         // Initialize the message.
+         // TODO: give destination address a real value if it gets implemented
+         CLog::write(CLog::VERBOSE, "node %d generating a message\n", (*it)->getInternalAddress());
+         Message* message = new Message((*it)->getInternalAddress(),    // sender's address
+                                     0,                                 // destination's address
+                                     configObj->getFrameLength());      // size
+         
+         // Load the message.
+         if (!(*it)->addMessage(message)) {
+            std::cout << "ERROR - failed to add message" << std::endl;  
          }
       }
    }
@@ -84,22 +106,9 @@ void determineNodeStates(std::vector<Node*> nodeVector, unsigned int currentTime
          // Check next node.
          continue;
       }
-          
-      // Determine if node should try to transmit - based on the porbability of frame generation.
-      if (generateRandomFloatZeroToOne() > (1 - configObj->getProbFrameGeneration())) {
-         // Initialize the message.
-         // TODO: give destination address a real value if it gets implemented
-         CLog::write(CLog::VERBOSE, "node %d will attempt to transmit a message\n", (*it)->getInternalAddress());
-         Message* message = new Message((*it)->getInternalAddress(),    // sender's address
-                                     0,                              // destination's address
-                                     configObj->getFrameLength());   // size
          
-         // Load the message.
-         if (!(*it)->setMessage(message)) {
-            std::cout << "ERROR - failed to load message" << std::endl;  
-         }
-         
-         // Check if the medium is idle for a transmission.
+      // Check if the idle node has a message to determine if it should start a transmission.
+      if ((*it)->hasMessage()) {
          if ((*it)->isMediumIdle(nodeVector)) {
             // If this is a p-persistent system another check is required.
             if (P_PERSISTENT == csmaType) {
