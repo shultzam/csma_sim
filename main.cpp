@@ -39,8 +39,6 @@ int main(int argc, char* argv[]) {
       nodeTotalMetrics[nodeIndex] = metricObj;
    }
    
-   // TODO: METRICS print config file
-   
    // For a clean simulation, all of the node objects will be recreated each time.
    unsigned short simCount = configObj->getSimulationCount();
    unsigned long timeSlots = configObj->getTimeSlotCount();
@@ -55,7 +53,7 @@ int main(int argc, char* argv[]) {
       // Initialize random seed.
       srand (time(NULL));
       
-      // TODO: Add simulation count.
+      // Show simulation count.
       CLog::write(CLog::METRICS, "- simulation %u -\n", simIndex);
       
       // Loop through all of the time-slots.

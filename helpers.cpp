@@ -179,6 +179,7 @@ void determineNodeStates(std::vector<Node*> nodeVector, unsigned int currentTime
       else {
          // Update the metric.
          transmittingNodes[0]->theNodeMetric->incrementClockCyclesTransmitting();
+         transmittingNodes[0]->theNodeMetric->incrementCountOfTransmissionAttempts();
       }
    }
    else {
@@ -199,6 +200,7 @@ void determineNodeStates(std::vector<Node*> nodeVector, unsigned int currentTime
          // Update the metrics.
          (*it)->theNodeMetric->incrementCountOfCollisions();
          (*it)->theNodeMetric->incrementClockCyclesIdle();
+         (*it)->theNodeMetric->incrementCountOfTransmissionAttempts();
       }
    }
 }
