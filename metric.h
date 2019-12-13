@@ -20,8 +20,8 @@ class Metric {
       // Setter for theCountOfClockCyclesIdle.
       void setClockCyclesIdle(unsigned int value);
       
-      // Setter for theCountOfClockCyclesBackedOff.
-      void setClockCyclesBackedOff(unsigned int value);
+      // Setter for theCountOfClockCyclesTransmitting.
+      void setClockCyclesTransmitting(unsigned int value);
       
       // Setter for theCountOfCollisions.
       void setCountOfCollisions(unsigned int value);
@@ -41,8 +41,8 @@ class Metric {
       // Incrementer for theCountOfClockCyclesIdle.
       void incrementClockCyclesIdle();
       
-      // Incrementer for theCountOfClockCyclesBackedOff.
-      void incrementClockCyclesBackedOff();
+      // Incrementer for theCountOfClockCyclesTransmitting.
+      void incrementClockCyclesTransmitting();
       
       // Incrementer for theCountOfCollisions.
       void incrementCountOfCollisions();
@@ -62,14 +62,17 @@ class Metric {
       // Setter for theMaximumRetransmissionAttempts.
       void setMaximumRetransmissionAttempts(unsigned int count);
       
+      // Updater for theTimeMessagesWaited.
+      void updateTimeMessagesWaited(unsigned int time);
+      
       /*
        * GETTERS
        */
       // Getter for theCountOfClockCyclesIdle.
       unsigned int getClockCyclesIdle();
       
-      // Getter for theCountOfClockCyclesBackedOff.
-      unsigned int getClockCyclesBackedOff();
+      // Getter for theCountOfClockCyclesTransmitting.
+      unsigned int getClockCyclesTransmitting();
       
       // Getter for theCountOfCollisions.
       unsigned int getCountOfCollisions();
@@ -89,12 +92,15 @@ class Metric {
       // Getter for theMaximumRetransmissionAttempts.
       unsigned int getMaximumRetransmissionAttempts();
       
+      // Getter for theTimeMessagesWaited.
+      unsigned int getTimeMessagesWaited();
+      
 	private:
       // Used to track the number of cycles in an idle stae.
       unsigned int theCountOfClockCyclesIdle;
       
-      // Used to track the number of cycles in a backed-off state.
-      unsigned int theCountOfClockCyclesBackedOff;
+      // Used to track the number of cycles in a transmitting state.
+      unsigned int theCountOfClockCyclesTransmitting;
       
       // Used to track how many collisions a channel experienced. 
       unsigned int theCountOfCollisions;
@@ -113,6 +119,10 @@ class Metric {
       
       // Used to track the maximum amount of retransmissions occurred before sending any one particular packet.
       unsigned int theMaximumRetransmissionAttempts;
+      
+      // Used to track the total time messages waited to be transmitted. 
+      // (time message completely transmitted - time message generated).
+      unsigned int theTimeMessagesWaited;
 };
 
 #endif	// __METRIC_H__

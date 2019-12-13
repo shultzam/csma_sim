@@ -52,7 +52,6 @@ bool Node::isMediumIdle(std::vector<Node*> nodeVector) {
 
 // Starts the transmit of a message to a node (other than itself).
 bool Node::startMessageTransmit(unsigned int currentTime) {
-   std::cout << "TEMP | entered " << __func__ << " for " << getInternalAddress() << std::endl;
    // Ensure the node has a message.
    if (!hasMessage()) {
       std::cout << "ERROR - cannot start message transmit on node " 
@@ -92,8 +91,7 @@ bool Node::startMessageTransmit(unsigned int currentTime) {
 }
 
 // Completes the node's current transmit of a message.
-bool Node::completeMessageTransmit() {
-   std::cout << "TEMP | entered " << __func__ << " for " << getInternalAddress() << std::endl;
+bool Node::completeMessageTransmit(int timeOfCompletion) {
    // Verify that this node is actually in a transmitting state.
    if (getNodeState() != TRANSMITTING) {
       std::cout << "WARNING - node " 
@@ -102,9 +100,6 @@ bool Node::completeMessageTransmit() {
                 << std::endl;
       return false;
    }
-   
-   // Remove the node's message that it was sending.
-   clearCurrentMessage();
    
    // Reset the node's state and return.
    if (!setNodeState(IDLE) || !setTimeOfTransmitCompletion(-1)) {
@@ -116,6 +111,11 @@ bool Node::completeMessageTransmit() {
    
    // Update the metric.
    theNodeMetric->incrementCountOfMessagesTransmitted();
+   unsigned int timeMessageWaited = timeOfCompletion - theMessageDeque[0]->getMessageTimeOfCreation();
+   theNodeMetric->updateTimeMessagesWaited(timeMessageWaited);
+   
+   // Remove the node's message that it was sending.
+   clearCurrentMessage();
    
    CLog::write(CLog::VERBOSE, "node %d completed message transmission\n", getInternalAddress());
    return true;
@@ -201,7 +201,6 @@ bool Node::hasMessage() {
 
 // Adds a message to theMessageVector.
 bool Node::addMessage(Message* messageObj) {
-   std::cout << "TEMP | entered " << __func__ << " for " << getInternalAddress() << std::endl;
    // Validate the object.
    if (!messageObj) {
       std::cout << "ERROR - message object is null" << std::endl;

@@ -8,13 +8,14 @@
 Metric::Metric() {
    // Initialize all values to 0.
    theCountOfClockCyclesIdle = 0;
-   theCountOfClockCyclesBackedOff = 0;
+   theCountOfClockCyclesTransmitting = 0;
    theCountOfCollisions = 0;
    theCountOfTransmissionAttempts = 0;
    theCountOfMessagesGenerated = 0;
    theCountOfMessagesTransmitted = 0;
    theMaximumRetransmissionAttempts = 0;
    theCountOfMessagesDropped = 0;
+   theTimeMessagesWaited = 0;
 }
 
 // Setter for theCountOfClockCyclesIdle.
@@ -22,9 +23,9 @@ void Metric::setClockCyclesIdle(unsigned int value) {
    theCountOfClockCyclesIdle = value;
 }
 
-// Setter for theCountOfClockCyclesBackedOff.
-void Metric::setClockCyclesBackedOff(unsigned int value) {
-   theCountOfClockCyclesBackedOff = value;
+// Setter for theCountOfClockCyclesTransmitting.
+void Metric::setClockCyclesTransmitting(unsigned int value) {
+   theCountOfClockCyclesTransmitting = value;
 }
 
 // Setter for theCountOfCollisions.
@@ -57,9 +58,9 @@ void Metric::incrementClockCyclesIdle() {
    theCountOfClockCyclesIdle++;
 }
 
-// Incrementer for theCountOfClockCyclesBackedOff.
-void Metric::incrementClockCyclesBackedOff() {
-   theCountOfClockCyclesBackedOff++;
+// Incrementer for theCountOfClockCyclesTransmitting.
+void Metric::incrementClockCyclesTransmitting() {
+   theCountOfClockCyclesTransmitting++;
 }
 
 // Incrementer for theCountOfCollisions.
@@ -92,14 +93,19 @@ void Metric::setMaximumRetransmissionAttempts(unsigned int count) {
    theMaximumRetransmissionAttempts = count;
 }
 
+// Updater for theTimeMessagesWaited.
+void Metric::updateTimeMessagesWaited(unsigned int time) {
+   theTimeMessagesWaited += time;
+}
+
 // Getter for theCountOfClockCyclesIdle.
 unsigned int Metric::getClockCyclesIdle() {
    return theCountOfClockCyclesIdle;
 }
 
-// Getter for theCountOfClockCyclesBackedOff.
-unsigned int Metric::getClockCyclesBackedOff() {
-   return theCountOfClockCyclesBackedOff;
+// Getter for theCountOfClockCyclesTransmitting.
+unsigned int Metric::getClockCyclesTransmitting() {
+   return theCountOfClockCyclesTransmitting;
 }
 
 // Getter for theCountOfCollisions.
@@ -130,4 +136,9 @@ unsigned int Metric::getCountOfMessagesDropped() {
 // Getter for theMaximumRetransmissionAttempts.
 unsigned int Metric::getMaximumRetransmissionAttempts() {
    return theMaximumRetransmissionAttempts;
+}
+      
+// Getter for theTimeMessagesWaited.
+unsigned int Metric::getTimeMessagesWaited() {
+   return theTimeMessagesWaited;
 }

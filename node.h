@@ -38,7 +38,7 @@ class Node {
       bool startMessageTransmit(unsigned int currentTime);
    
       // Completes the node's current transmit of a message.
-      bool completeMessageTransmit();
+      bool completeMessageTransmit(int timeOfCreation);
    
       // Backs off from attempting to transmit based on the current configuration.
       bool backoffFromTransmit(unsigned int timeOfNextTransmitAttempt);

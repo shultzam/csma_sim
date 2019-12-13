@@ -20,10 +20,10 @@ void determineNodeStates(std::vector<Node*> nodeVector, unsigned int currentTime
    for (std::vector<Node*>::iterator it = nodeVector.begin(); it != nodeVector.end(); it++) {
       // Check if current node is transmitting and has completed its transmission.
       if (TRANSMITTING == (*it)->getNodeState() && currentTime == (*it)->getTimeOfTransmitCompletion()) {
-         if (!(*it)->completeMessageTransmit()) {
-            std::cout << "WARNING - failed to complete message transmit for node " 
-                      << (*it)->getInternalAddress() 
-                      << std::endl;
+         if (!(*it)->completeMessageTransmit(currentTime)) {
+               std::cout << "WARNING - failed to complete message transmit for node " 
+                         << (*it)->getInternalAddress() 
+                         << std::endl;
          }
       }
    }
@@ -37,7 +37,8 @@ void determineNodeStates(std::vector<Node*> nodeVector, unsigned int currentTime
          CLog::write(CLog::VERBOSE, "node %d generating a message\n", (*it)->getInternalAddress());
          Message* message = new Message((*it)->getInternalAddress(),    // sender's address
                                      0,                                 // destination's address
-                                     configObj->getFrameLength());      // size
+                                     configObj->getFrameLength(),       // size
+                                     currentTime);                      // time of message creation
          
          // Load the message.
          if (!(*it)->addMessage(message)) {
@@ -58,6 +59,10 @@ void determineNodeStates(std::vector<Node*> nodeVector, unsigned int currentTime
       if (TRANSMITTING == (*it)->getNodeState()) {
          // No need to consider transmitting again if already transmitting.
          CLog::write(CLog::VERBOSE, "node %d is transmitting\n", (*it)->getInternalAddress());
+                  
+         // Update the metric.
+         (*it)->theNodeMetric->incrementClockCyclesTransmitting();
+         
          continue;
       }
       // Check if current node is transmitting.
@@ -81,7 +86,7 @@ void determineNodeStates(std::vector<Node*> nodeVector, unsigned int currentTime
                      }
          
                      // Update the metric.
-                     (*it)->theNodeMetric->incrementClockCyclesBackedOff();
+                     (*it)->theNodeMetric->incrementClockCyclesIdle();
                   }
                }
                // Medium is idle and a CSMA protocol other than p-Persistent was chosen so transmit immediately.
@@ -98,9 +103,13 @@ void determineNodeStates(std::vector<Node*> nodeVector, unsigned int currentTime
                }
                
                // Update the metric.
+               (*it)->theNodeMetric->incrementClockCyclesIdle();
                (*it)->theNodeMetric->incrementCountOfTransmissionAttempts();
-               (*it)->theNodeMetric->incrementClockCyclesBackedOff();
             }
+         }
+         else {         
+            // Update the metric.
+            (*it)->theNodeMetric->incrementClockCyclesIdle();
          }
          
          // Check next node.
@@ -122,13 +131,13 @@ void determineNodeStates(std::vector<Node*> nodeVector, unsigned int currentTime
                   // Backoff until next timeslot and do it again.
                   CLog::write(CLog::VERBOSE, 
                               "p-persistance node %d will wait until next time cycle and try again\n", 
-                                    (*it)->getInternalAddress());
+                              (*it)->getInternalAddress());
                   if (!(*it)->backoffFromTransmit(currentTime + 1)) {
                      std::cout << "ERROR - failed to continue back-off from transmit of message" << std::endl;
                   }
                   
                   // Update the metric.
-                  (*it)->theNodeMetric->incrementClockCyclesBackedOff();
+                  (*it)->theNodeMetric->incrementClockCyclesIdle();
                }
             }
             // Every other CSMA type will transmit immediately given an idle system.
@@ -150,6 +159,7 @@ void determineNodeStates(std::vector<Node*> nodeVector, unsigned int currentTime
             
             // Update the metric.
             (*it)->theNodeMetric->incrementCountOfTransmissionAttempts();
+            (*it)->theNodeMetric->incrementClockCyclesIdle();
          }
       }
       else {
@@ -165,6 +175,10 @@ void determineNodeStates(std::vector<Node*> nodeVector, unsigned int currentTime
    else if (1 == transmittingNodes.size()) {
       if (!transmittingNodes[0]->startMessageTransmit(currentTime)) {
          std::cout << "ERROR - failed to start transmit of message" << std::endl;  
+      }
+      else {
+         // Update the metric.
+         transmittingNodes[0]->theNodeMetric->incrementClockCyclesTransmitting();
       }
    }
    else {
@@ -184,7 +198,7 @@ void determineNodeStates(std::vector<Node*> nodeVector, unsigned int currentTime
          
          // Update the metrics.
          (*it)->theNodeMetric->incrementCountOfCollisions();
-         (*it)->theNodeMetric->incrementClockCyclesBackedOff();
+         (*it)->theNodeMetric->incrementClockCyclesIdle();
       }
    }
 }
