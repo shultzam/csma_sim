@@ -10,7 +10,7 @@
 class Message {
 	public:
       // Constructor with args.
-      Message(int sendingAddress, int receiveAddress, int messageSize);
+      Message(int sendingAddress, int receiveAddress, int messageSize, int timeOfCreation);
    
       // Destructor not declared since the default will suffice.
    
@@ -25,6 +25,9 @@ class Message {
       
       // Setter for theMessageSize.
       bool setMessageSize(int size);
+      
+      // Setter for theMessageTimeOfCreation.
+      bool setMessageTimeOfCreation(int time);
    
    	/*
        * GETTERS
@@ -35,8 +38,11 @@ class Message {
       // Getter for theReceiveAddr.
       int getReceiveAddr();
       
-      // Setter for theMessageSize.
+      // Getter for theMessageSize.
       int getMessageSize();
+      
+      // Getter for theMessageTimeOfCreation.
+      int getMessageTimeOfCreation();
    
    private:
       // The address of the sender node.
@@ -47,6 +53,9 @@ class Message {
 	
 	   // The size of the message (used to determine when the message will be finished sending).
       int theMessageSize;
+      
+      // The time that the message was created.
+      int theMessageTimeOfCreation;
 };
 
 #endif	// __MESSAGE_H__
